@@ -1,5 +1,13 @@
 let initialized;
 
+const endpoint = "/api";
+console.log(document.currentScript);
+send();
+
+const { webid } = document.currentScript.dataset;
+
+console.log(webid);
+
 document.addEventListener("readystatechange", () => {
   console.log("readyState", document.readyState);
   if (document.readyState === "complete" && !initialized) {
@@ -9,37 +17,20 @@ document.addEventListener("readystatechange", () => {
 });
 
 function init() {
-  track();
+  send();
   initialized = true;
 }
-const track = (obj, data) => {
-  // if (typeof obj === "string") {
-  //   return send({
-  //     ...getPayload(),
-  //     name: obj,
-  //     data: typeof data === "object" ? data : undefined,
-  //   });
-  // } else if (typeof obj === "object") {
-  //   return send(obj);
-  // } else if (typeof obj === "function") {
-  //   return send(obj(getPayload()));
-  // }
-  // return send(getPayload());
-};
 
 function send(payload, type = "event") {
   const headers = {
     "Content-Type": "application/json",
   };
-  if (typeof cache !== "undefined") {
-    headers["x-umami-cache"] = cache;
-  }
+
   return fetch(endpoint, {
-    method: "POST",
+    method: "GET",
     body: JSON.stringify({ type, payload }),
     headers,
   })
-    .then((res) => res.text())
-    .then((text) => (cache = text))
+    .then(() => {})
     .catch(() => {}); // no-op, gulp error
 }
