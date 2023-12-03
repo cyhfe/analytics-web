@@ -1,6 +1,10 @@
+import { useEffect } from "react";
 import { Routes, Route, Outlet, Link } from "react-router-dom";
 
 export default function App() {
+  useEffect(() => {
+    // fetch("http://localhost:4002/api");
+  }, []);
   return (
     <div>
       <h1>Basic Example</h1>
