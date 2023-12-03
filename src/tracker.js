@@ -27,4 +27,19 @@ const track = (obj, data) => {
   // return send(getPayload());
 };
 
-function send() {}
+function send(payload, type = "event") {
+  const headers = {
+    "Content-Type": "application/json",
+  };
+  if (typeof cache !== "undefined") {
+    headers["x-umami-cache"] = cache;
+  }
+  return fetch(endpoint, {
+    method: "POST",
+    body: JSON.stringify({ type, payload }),
+    headers,
+  })
+    .then((res) => res.text())
+    .then((text) => (cache = text))
+    .catch(() => {}); // no-op, gulp error
+}
