@@ -1,10 +1,7 @@
 (async (window) => {
-  let initialized;
-
-  const endpoint = "http://localhost:4002/api";
+  const endpoint = "http://localhost:4002/api/analytics";
   const hook = (_this, method, before, after) => {
     const orig = _this[method];
-
     return (...args) => {
       before?.apply(null, args);
       const res = orig.apply(_this, args);
@@ -12,51 +9,76 @@
       return res;
     };
   };
-  function send(payload = {}, type = "event") {
+  function send(type, payload) {
     const headers = {
       "Content-Type": "application/json",
     };
-
-    // return window.fetch(endpoint, {
-    //   method: "POST",
-    //   body: JSON.stringify({ type, payload }),
-    //   headers,
-    // });
+    return window.fetch(endpoint, {
+      method: "POST",
+      body: JSON.stringify({ type, payload }),
+      headers,
+    });
   }
 
-  const {
-    screen: { width, height },
-    navigator: { language },
-    location,
-    document,
-    history,
-  } = window;
+  const { screen, navigator, location, document, history } = window;
 
-  const { hostname, pathname, search } = location;
+  const { wid } = document.currentScript.dataset;
 
-  let title = document.title;
+  let enterTimestamp;
 
-  let currentUrl = `${pathname}${search}`;
-  let currentreferrer = document.referrer;
-  const { website } = document.currentScript.dataset;
-  let currentPathname;
+  const pageViewsCount = new Map();
+
+  //init visible refresh
+  function handleEnter() {
+    enterTimestamp = Date.now();
+    const body = {
+      wid,
+    };
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    window.fetch(endpoint + "/enter", {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers,
+    });
+  }
 
   function getPayload() {
+    if (!enterTimestamp) {
+      return;
+    }
+    const dt = Date.now() - enterTimestamp;
     return {
-      website,
-      hostname: location.hostname,
-      screen: { width, height },
-      language,
-      title,
-      url: location.pathname,
+      duration: dt,
+      wid,
+      screen: `${screen.width}x${screen.height}`,
+      language: navigator.language,
       referrer: document.referrer,
     };
+  }
+
+  // hidden refresh quit
+  function handleLeave() {
+    const payload = getPayload();
+    if (!payload) return;
+  }
+
+  function handleRouterChange() {
+    pageViewsCount.set(
+      location.pathname,
+      (pageViewsCount.get(location.pathname) || 0) + 1
+    );
+    // const views = {
+    //   [pathname]: 1,
+    // };
   }
 
   // 进入页面时触发 "enter"
   document.addEventListener("readystatechange", () => {
     if (document.readyState === "complete") {
       console.log("readystatechange complete", location);
+      handleEnter();
     }
   });
 
@@ -93,7 +115,7 @@
   }
 
   // 鼠标点击浏览器前进后退时触发
-  window.addEventListener("popstate", async (e) => {
+  window.addEventListener("popstate", () => {
     // send(getPayload());
     console.log(currentPathname);
     currentPathname = location.pathname;

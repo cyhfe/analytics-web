@@ -1,9 +1,13 @@
 import { useEffect } from "react";
 import { Routes, Route, Outlet, Link } from "react-router-dom";
-
+import UAParser from "ua-parser-js";
 export default function App() {
   useEffect(() => {
     // fetch("http://localhost:4002/api");
+    const parser = new UAParser(navigator.userAgent); // you need to pass the user-agent for nodejs
+    console.log(parser); // {}
+    const parserResults = parser.getResult();
+    console.log(parserResults);
   }, []);
   return (
     <div>
