@@ -14,6 +14,8 @@
 
   const { wid } = document.currentScript.dataset;
 
+  let sessionId;
+
   let enterTimestamp;
 
   let prevPathname;
@@ -28,15 +30,22 @@
 
     const body = {
       wid,
+      sessionId,
     };
     const headers = {
       "Content-Type": "application/json",
     };
-    window.fetch(endpoint + "/enter", {
-      method: "POST",
-      body: JSON.stringify(body),
-      headers,
-    });
+    window
+      .fetch(endpoint + "/enter", {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers,
+      })
+      .then((res) =>
+        res.text().then((text) => {
+          sessionId = text;
+        })
+      );
   }
 
   // hidden refresh quit
@@ -46,7 +55,7 @@
 
     const body = {
       pageViewsData: pageViewsDataToObj,
-      wid,
+      sessionId,
       screen: `${screen.width}x${screen.height}`,
       language: navigator.language,
       referrer: document.referrer,
@@ -61,7 +70,6 @@
   // 进入页面时触发 "enter"
   document.addEventListener("readystatechange", () => {
     if (document.readyState === "complete") {
-      console.log("readystatechange complete", location);
       handleEnter();
     }
   });
