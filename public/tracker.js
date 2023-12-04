@@ -9,16 +9,6 @@
       return res;
     };
   };
-  function send(type, payload) {
-    const headers = {
-      "Content-Type": "application/json",
-    };
-    return window.fetch(endpoint, {
-      method: "POST",
-      body: JSON.stringify({ type, payload }),
-      headers,
-    });
-  }
 
   const { screen, navigator, location, document, history } = window;
 
@@ -49,31 +39,23 @@
     });
   }
 
-  function getPayload() {
-    if (!enterTimestamp) {
-      return;
-    }
-    const dt = Date.now() - enterTimestamp;
-    return {
-      duration: dt,
+  // hidden refresh quit
+  function handleLeave() {
+    updaPageViewData();
+    const pageViewsDataToObj = Object.fromEntries(pageViewsData);
+
+    const body = {
+      pageViewsData: pageViewsDataToObj,
       wid,
       screen: `${screen.width}x${screen.height}`,
       language: navigator.language,
       referrer: document.referrer,
     };
-  }
-
-  // hidden refresh quit
-  function handleLeave() {
-    updaPageViewData();
-    const pageViewsDataToObj = Object.fromEntries(pageViewsData);
-    console.log(pageViewsDataToObj);
-    const body = { hello: "world" };
     const headers = {
       type: "application/json",
     };
     const blob = new Blob([JSON.stringify(body)], headers);
-    // navigator.sendBeacon(endpoint + "/leave", blob);
+    navigator.sendBeacon(endpoint + "/leave", blob);
   }
 
   // 进入页面时触发 "enter"
