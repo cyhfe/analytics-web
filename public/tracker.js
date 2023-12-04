@@ -56,6 +56,7 @@
     const body = {
       pageViewsData: pageViewsDataToObj,
       sessionId,
+      wid,
       screen: `${screen.width}x${screen.height}`,
       language: navigator.language,
       referrer: document.referrer,
