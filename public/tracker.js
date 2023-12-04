@@ -26,11 +26,16 @@
 
   let enterTimestamp;
 
-  const pageViewsCount = new Map();
+  let prevPathname;
+
+  const pageViewsData = new Map();
 
   //init visible refresh
   function handleEnter() {
     enterTimestamp = Date.now();
+    prevPathname = location.pathname;
+    pageViewsData.clear();
+
     const body = {
       wid,
     };
@@ -60,18 +65,15 @@
 
   // hidden refresh quit
   function handleLeave() {
-    const payload = getPayload();
-    if (!payload) return;
-  }
-
-  function handleRouterChange() {
-    pageViewsCount.set(
-      location.pathname,
-      (pageViewsCount.get(location.pathname) || 0) + 1
-    );
-    // const views = {
-    //   [pathname]: 1,
-    // };
+    updaPageViewData();
+    const pageViewsDataToObj = Object.fromEntries(pageViewsData);
+    console.log(pageViewsDataToObj);
+    const body = { hello: "world" };
+    const headers = {
+      type: "application/json",
+    };
+    const blob = new Blob([JSON.stringify(body)], headers);
+    // navigator.sendBeacon(endpoint + "/leave", blob);
   }
 
   // 进入页面时触发 "enter"
@@ -85,12 +87,11 @@
   // 页面切换,关闭时触发 "leave"
   document.addEventListener("visibilitychange", function logData() {
     if (document.visibilityState === "hidden") {
-      console.log("leave visibilitychange", location);
-      // navigator.sendBeacon(endpoint);
+      handleLeave();
     }
 
     if (document.visibilityState === "visible") {
-      console.log("enter visibilitychange", getPayload());
+      handleEnter();
     }
   });
 
@@ -103,22 +104,28 @@
     handleAfter
   );
 
-  function handleBefore() {
-    // send(getPayload());
-    console.log("leave,pushState be", location.pathname);
+  function updaPageViewData() {
+    const dt = Date.now() - enterTimestamp;
+    pageViewsData.set(prevPathname, {
+      count: (pageViewsData.get(prevPathname)?.count ?? 0) + 1,
+      duration: (pageViewsData.get(prevPathname)?.duration ?? 0) + dt,
+    });
   }
 
+  function handleBefore() {}
+
   function handleAfter() {
-    // send(getPayload());
-    currentPathname = location.pathname;
-    console.log("leave,pushState af", location.pathname);
+    if (prevPathname !== location.pathname) {
+      updaPageViewData();
+      enterTimestamp = Date.now();
+      prevPathname = location.pathname;
+    }
   }
 
   // 鼠标点击浏览器前进后退时触发
   window.addEventListener("popstate", () => {
-    // send(getPayload());
-    console.log(currentPathname);
-    currentPathname = location.pathname;
-    console.log("popstate", location.pathname);
+    updaPageViewData();
+    prevPathname = location.pathname;
+    enterTimestamp = Date.now();
   });
 })(window);
