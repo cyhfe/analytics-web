@@ -1,7 +1,6 @@
 (async (window) => {
-  const endpoint =
-    // eslint-disable-next-line no-undef
-    process.env.endpoint || "http://localhost:4002/api/analytics";
+  // const endpoint = "http://localhost:4002/api/analytics";
+  const endpoint = "analytics-server.icyh.me/api/analytics";
   const hook = (_this, method, before, after) => {
     const orig = _this[method];
     return (...args) => {
@@ -54,21 +53,19 @@
   function handleLeave() {
     updatePageViewData();
     const pageViewsDataToObj = Object.fromEntries(pageViewsData);
-    const eventDataToObj = eventData.size
-      ? Object.fromEntries(eventData)
-      : null;
-    const positionDataToObj = positionData.size
-      ? Array.from(positionData)
-      : null;
+    // todo: event tracker
+    // const eventDataToObj = eventData.size
+    //   ? Object.fromEntries(eventData)
+    //   : null;
+    // const positionDataToObj = positionData.size
+    //   ? Array.from(positionData)
+    //   : null;
     pageViewsData.clear();
     eventData.clear();
     positionData.clear();
-    console.log(pageViewsDataToObj, eventDataToObj, positionDataToObj);
-    console.log(pageViewsData, eventData, positionData);
 
     const body = {
       pageViewsData: pageViewsDataToObj,
-
       sessionId,
       wid,
       screen: `${screen.width}x${screen.height}`,
