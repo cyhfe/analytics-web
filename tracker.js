@@ -1,6 +1,6 @@
 (async (window) => {
   // const endpoint = "http://localhost:4002/api/analytics";
-  const endpoint = "analytics-server.icyh.me/api/analytics";
+  const endpoint = "https://analytics-server.icyh.me/api/analytics";
   const hook = (_this, method, before, after) => {
     const orig = _this[method];
     return (...args) => {
