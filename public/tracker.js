@@ -21,12 +21,12 @@
   let prevPathname;
 
   const pageViewsData = new Map();
-
+  const eventData = new Map();
+  const positionData = new Set();
   //init visible refresh
   function handleEnter() {
     enterTimestamp = Date.now();
     prevPathname = location.pathname;
-    pageViewsData.clear();
 
     const body = {
       wid,
@@ -50,11 +50,23 @@
 
   // hidden refresh quit
   function handleLeave() {
-    updaPageViewData();
+    updatePageViewData();
     const pageViewsDataToObj = Object.fromEntries(pageViewsData);
+    const eventDataToObj = eventData.size
+      ? Object.fromEntries(eventData)
+      : null;
+    const positionDataToObj = positionData.size
+      ? Array.from(positionData)
+      : null;
+    pageViewsData.clear();
+    eventData.clear();
+    positionData.clear();
+    console.log(pageViewsDataToObj, eventDataToObj, positionDataToObj);
+    console.log(pageViewsData, eventData, positionData);
 
     const body = {
       pageViewsData: pageViewsDataToObj,
+
       sessionId,
       wid,
       screen: `${screen.width}x${screen.height}`,
@@ -95,7 +107,7 @@
     handleAfter
   );
 
-  function updaPageViewData() {
+  function updatePageViewData() {
     const dt = Date.now() - enterTimestamp;
     pageViewsData.set(prevPathname, {
       count: (pageViewsData.get(prevPathname)?.count ?? 0) + 1,
@@ -103,11 +115,13 @@
     });
   }
 
+  // function update
+
   function handleBefore() {}
 
   function handleAfter() {
     if (prevPathname !== location.pathname) {
-      updaPageViewData();
+      updatePageViewData();
       enterTimestamp = Date.now();
       prevPathname = location.pathname;
     }
@@ -115,8 +129,24 @@
 
   // 鼠标点击浏览器前进后退时触发
   window.addEventListener("popstate", () => {
-    updaPageViewData();
+    updatePageViewData();
     prevPathname = location.pathname;
     enterTimestamp = Date.now();
+  });
+
+  window.addEventListener("click", (e) => {
+    if (!e.target || !e.target?.dataset) return;
+    positionData.add({
+      x: e.clientX,
+      y: e.clientY,
+    });
+    for (const keyname in e.target.dataset) {
+      if (keyname.startsWith("analytics")) {
+        const key = keyname.slice(9);
+        eventData.set(key, {
+          count: (eventData.get(key)?.count ?? 0) + 1,
+        });
+      }
+    }
   });
 })(window);

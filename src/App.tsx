@@ -7,6 +7,8 @@ export default function App() {
     <div>
       <h1>Basic Example</h1>
 
+      <button data-analytics-my-button="true">sad</button>
+
       <p>
         This example demonstrates some of the core features of React Router
         including nested <code>&lt;Route&gt;</code>s,{" "}
