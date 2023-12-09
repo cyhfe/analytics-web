@@ -43,8 +43,8 @@ function init() {
         headers,
       })
       .then((res) =>
-        res.text().then((text) => {
-          sessionId = text;
+        res.json().then((data) => {
+          sessionId = data.sessionId;
         })
       );
   }
