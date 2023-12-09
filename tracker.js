@@ -1,6 +1,6 @@
 function init() {
-  const endpoint = "http://localhost:4003/api/analytics";
-  // const endpoint = "https://analytics-server.icyh.me/api/analytics";
+  // const endpoint = "http://localhost:4003/api/analytics";
+  const endpoint = "https://analytics-server.icyh.me/api/analytics";
   const hook = (_this, method, before, after) => {
     const orig = _this[method];
     return (...args) => {
@@ -107,10 +107,13 @@ function init() {
   );
 
   function updatePageViewData() {
-    // if (!prevPathname || !location.pathname) {
-    //   prevPathname = location.pathname;
-    //   // enterTimestamp = Date.now();
-    // }
+    if (!prevPathname) {
+      prevPathname = location.pathname;
+    }
+    if (!enterTimestamp) {
+      enterTimestamp = Date.now();
+    }
+
     const dt = Date.now() - enterTimestamp;
 
     pageViewsData.set(prevPathname, {
