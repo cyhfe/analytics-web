@@ -1,6 +1,6 @@
 function init() {
-  // const endpoint = "http://localhost:4003/api/analytics";
-  const endpoint = "https://analytics-server.icyh.me/api/analytics";
+  const endpoint =
+    process.env.ENDPOINT ?? "http://localhost:4003/api/analytics";
   const hook = (_this, method, before, after) => {
     const orig = _this[method];
     return (...args) => {
